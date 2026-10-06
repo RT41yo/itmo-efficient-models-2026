@@ -49,6 +49,13 @@ def load_config(path: str | Path, repo_root: str | Path) -> ExperimentConfig:
         raise ValueError("Число эпох должно быть положительным")
 
     scheduler = raw["scheduler"]
+    if scheduler["kind"] not in {"inverse", "step", "onecycle"}:
+        raise ValueError(f"Неизвестное расписание: {scheduler['kind']!r}")
+    if scheduler["kind"] == "step":
+        if int(scheduler["step_size"]) <= 0:
+            raise ValueError("Размер ступени должен быть положительным")
+        if not 0 < float(scheduler["gamma"]) < 1:
+            raise ValueError("Коэффициент step должен находиться между 0 и 1")
     if scheduler["kind"] == "onecycle":
         phase_epochs = (
             int(scheduler["up_epochs"])
@@ -61,5 +68,10 @@ def load_config(path: str | Path, repo_root: str | Path) -> ExperimentConfig:
                 "должна совпадать с training.epochs"
             )
 
-    return ExperimentConfig(raw=raw, source_path=source_path, repo_root=Path(repo_root).resolve())
+    paper = raw.get("paper")
+    if paper is not None:
+        for required in ("order", "label", "schedule", "target_accuracy", "target_std", "target_epochs"):
+            if required not in paper:
+                raise ValueError(f"В разделе 'paper' отсутствует поле {required!r}")
 
+    return ExperimentConfig(raw=raw, source_path=source_path, repo_root=Path(repo_root).resolve())

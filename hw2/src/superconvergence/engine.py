@@ -19,7 +19,13 @@ from torch.utils.data import DataLoader
 from .config import ExperimentConfig
 from .data import build_mnist_loaders
 from .model import CaffeLeNet, build_caffe_parameter_groups, count_parameters
-from .schedules import InverseSchedule, OneCycleSchedule, SchedulePoint, apply_schedule
+from .schedules import (
+    InverseSchedule,
+    OneCycleSchedule,
+    SchedulePoint,
+    StepSchedule,
+    apply_schedule,
+)
 
 
 HISTORY_FIELDS = [
@@ -114,6 +120,13 @@ def build_schedule(
             momentum=float(optimizer_config["momentum"]),
             gamma=float(scheduler_config["gamma"]),
             power=float(scheduler_config["power"]),
+        )
+    if kind == "step":
+        return StepSchedule(
+            base_lr=float(optimizer_config["lr"]),
+            momentum=float(optimizer_config["momentum"]),
+            step_size=int(scheduler_config["step_size"]),
+            gamma=float(scheduler_config["gamma"]),
         )
     if kind == "onecycle":
         return OneCycleSchedule(
@@ -349,6 +362,7 @@ def run_experiment(
 
     total_seconds = time.perf_counter() - total_start
     best_row = max(history, key=lambda item: float(item["test_accuracy"]))
+    paper = raw.get("paper", {})
     summary = {
         "experiment": config.name,
         "seed": seed,
@@ -364,8 +378,10 @@ def run_experiment(
         "eval_seconds": sum(float(row["eval_seconds"]) for row in history),
         "total_seconds": total_seconds,
         "peak_gpu_memory_mib": max(float(row["peak_gpu_memory_mib"]) for row in history),
-        "paper_target_accuracy": 99.03 if scheduler_config["kind"] == "inverse" else 99.25,
-        "paper_target_epochs": 85 if scheduler_config["kind"] == "inverse" else 12,
+        "paper_schedule": paper.get("schedule"),
+        "paper_target_accuracy": paper.get("target_accuracy"),
+        "paper_target_std": paper.get("target_std"),
+        "paper_target_epochs": paper.get("target_epochs"),
     }
     (output_dir / "summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"

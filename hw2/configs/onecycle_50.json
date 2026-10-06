@@ -1,13 +1,13 @@
 {
-  "name": "onecycle_12_epochs",
+  "name": "onecycle_50_epochs",
   "seed": 42,
   "paper": {
-    "order": 3,
-    "label": "1 цикл, 12 эпох",
-    "schedule": "0.01-0.1/5",
-    "target_accuracy": 99.25,
-    "target_std": 0.03,
-    "target_epochs": 12
+    "order": 5,
+    "label": "1 цикл, 50 эпох",
+    "schedule": "0.01-0.1/23",
+    "target_accuracy": 99.27,
+    "target_std": 0.07,
+    "target_epochs": 50
   },
   "data": {
     "root": "hw2/data",
@@ -31,18 +31,18 @@
     "min_lr": 0.01,
     "max_lr": 0.1,
     "final_lr": 0.00001,
-    "up_epochs": 5,
-    "down_epochs": 5,
-    "final_epochs": 2,
+    "up_epochs": 23,
+    "down_epochs": 23,
+    "final_epochs": 4,
     "min_momentum": 0.8,
     "max_momentum": 0.95
   },
   "training": {
-    "epochs": 12,
+    "epochs": 50,
     "device": "auto",
     "deterministic": false,
     "amp": false,
     "log_every_steps": 25,
-    "output_dir": "hw2/results/onecycle"
+    "output_dir": "hw2/results/onecycle_50"
   }
 }

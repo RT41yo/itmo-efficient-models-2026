@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from superconvergence.schedules import InverseSchedule, OneCycleSchedule
+from superconvergence.schedules import InverseSchedule, OneCycleSchedule, StepSchedule
 
 
 def test_inverse_schedule_matches_caffe_formula() -> None:
@@ -10,6 +10,22 @@ def test_inverse_schedule_matches_caffe_formula() -> None:
     assert schedule(0).lr == pytest.approx(0.01)
     assert schedule(10_000).lr == pytest.approx(0.01 * 2 ** (-0.75))
     assert schedule(123).momentum == pytest.approx(0.9)
+
+
+def test_step_schedule_changes_at_declared_boundaries() -> None:
+    schedule = StepSchedule(base_lr=0.01, momentum=0.9, step_size=5_000, gamma=0.1)
+    assert schedule(0).lr == pytest.approx(0.01)
+    assert schedule(4_999).lr == pytest.approx(0.01)
+    assert schedule(5_000).lr == pytest.approx(0.001)
+    assert schedule(10_000).lr == pytest.approx(0.0001)
+    assert schedule(5_000).momentum == pytest.approx(0.9)
+
+
+def test_step_schedule_rejects_invalid_values() -> None:
+    with pytest.raises(ValueError):
+        StepSchedule(step_size=0)
+    with pytest.raises(ValueError):
+        StepSchedule(gamma=1.0)
 
 
 def test_onecycle_reaches_all_declared_boundaries() -> None:

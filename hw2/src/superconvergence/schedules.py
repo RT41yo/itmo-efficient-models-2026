@@ -51,6 +51,38 @@ class InverseSchedule:
         return SchedulePoint(lr=lr, momentum=self.momentum, phase="inverse")
 
 
+class StepSchedule:
+    """Ступенчатое расписание Caffe.
+
+    lr(step) = base_lr * gamma ** floor(step / step_size)
+    """
+
+    def __init__(
+        self,
+        base_lr: float = 0.01,
+        momentum: float = 0.9,
+        step_size: int = 5_000,
+        gamma: float = 0.1,
+    ) -> None:
+        if base_lr <= 0:
+            raise ValueError("Начальная скорость обучения должна быть положительной")
+        if step_size <= 0:
+            raise ValueError("Размер ступени должен быть положительным")
+        if not 0 < gamma < 1:
+            raise ValueError("Коэффициент ступенчатого снижения должен находиться между 0 и 1")
+        self.base_lr = float(base_lr)
+        self.momentum = float(momentum)
+        self.step_size = int(step_size)
+        self.gamma = float(gamma)
+
+    def __call__(self, step: int) -> SchedulePoint:
+        if step < 0:
+            raise IndexError("Номер шага не может быть отрицательным")
+        stage = step // self.step_size
+        lr = self.base_lr * self.gamma**stage
+        return SchedulePoint(lr=lr, momentum=self.momentum, phase=f"step_{stage}")
+
+
 class OneCycleSchedule:
     """Линейный 1cycle с отдельным завершающим снижением скорости."""
 

@@ -13,10 +13,17 @@ REPO_ROOT = HW2_ROOT.parent
 
 
 def test_project_configs_are_valid() -> None:
+    paths = sorted((HW2_ROOT / "configs").glob("*.json"))
+    configs = [load_config(path, REPO_ROOT) for path in paths]
+    assert len(configs) == 6
+    assert sorted(config.raw["paper"]["order"] for config in configs) == list(range(1, 7))
+
     baseline = load_config(HW2_ROOT / "configs" / "baseline.json", REPO_ROOT)
+    step = load_config(HW2_ROOT / "configs" / "baseline_step.json", REPO_ROOT)
     onecycle = load_config(HW2_ROOT / "configs" / "onecycle.json", REPO_ROOT)
     assert baseline.section("training")["epochs"] == 85
     assert baseline.section("training")["max_steps"] == 10_000
+    assert step.section("scheduler")["step_size"] == 5_000
     assert onecycle.section("training")["epochs"] == 12
     assert onecycle.section("scheduler")["up_epochs"] == 5
     assert onecycle.section("scheduler")["down_epochs"] == 5

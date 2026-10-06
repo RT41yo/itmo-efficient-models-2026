@@ -128,3 +128,70 @@ def plot_comparison(
     figure.savefig(output, dpi=160)
     plt.close(figure)
     return output
+
+
+def plot_mnist_suite(
+    aggregate: list[dict[str, float | int | str]],
+    output_dir: str | Path,
+) -> Path:
+    """Строит общее сравнение всех шести строк MNIST–LeNet."""
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    labels = [str(row["label"]) for row in aggregate]
+    positions = list(range(len(labels)))
+    our_accuracy = [float(row["our_mean_accuracy"]) for row in aggregate]
+    our_std = [float(row["our_std_accuracy"]) for row in aggregate]
+    paper_accuracy = [float(row["paper_accuracy"]) for row in aggregate]
+    paper_std = [float(row["paper_std"]) for row in aggregate]
+
+    figure, axes = plt.subplots(2, 2, figsize=(15, 10))
+    width = 0.38
+    axes[0, 0].bar(
+        [position - width / 2 for position in positions],
+        paper_accuracy,
+        width,
+        yerr=paper_std,
+        capsize=3,
+        label="статья",
+    )
+    axes[0, 0].bar(
+        [position + width / 2 for position in positions],
+        our_accuracy,
+        width,
+        yerr=our_std,
+        capsize=3,
+        label="воспроизведение",
+    )
+    lower = min(paper_accuracy + our_accuracy) - 0.2
+    upper = max(paper_accuracy + our_accuracy) + 0.12
+    axes[0, 0].set_ylim(lower, upper)
+    axes[0, 0].set_ylabel("Тестовая точность, %")
+    axes[0, 0].set_title("Финальная точность")
+    axes[0, 0].legend()
+
+    epochs = [float(row["epochs"]) for row in aggregate]
+    axes[0, 1].bar(positions, epochs, color="C2")
+    axes[0, 1].set_ylabel("Эпохи")
+    axes[0, 1].set_title("Продолжительность обучения")
+
+    steps = [float(row["mean_total_steps"]) for row in aggregate]
+    axes[1, 0].bar(positions, steps, color="C3")
+    axes[1, 0].set_ylabel("Обновления весов")
+    axes[1, 0].set_title("Число обновлений")
+
+    seconds = [float(row["mean_total_seconds"]) for row in aggregate]
+    axes[1, 1].bar(positions, seconds, color="C4")
+    axes[1, 1].set_ylabel("Секунды")
+    axes[1, 1].set_title("Измеренное время")
+
+    for axis in axes.flat:
+        axis.set_xticks(positions, labels, rotation=18, ha="right")
+        axis.grid(axis="y", alpha=0.3)
+
+    figure.suptitle("Воспроизведение опытов MNIST–LeNet", fontsize=15)
+    figure.tight_layout()
+    output = output_dir / "mnist_comparison.png"
+    figure.savefig(output, dpi=160)
+    plt.close(figure)
+    return output

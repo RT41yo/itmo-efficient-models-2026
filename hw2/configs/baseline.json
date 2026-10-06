@@ -1,6 +1,14 @@
 {
   "name": "baseline_inverse_85_epochs",
   "seed": 42,
+  "paper": {
+    "order": 1,
+    "label": "обратно-степенное, 85 эпох",
+    "schedule": "0.01/inv",
+    "target_accuracy": 99.03,
+    "target_std": 0.04,
+    "target_epochs": 85
+  },
   "data": {
     "root": "hw2/data",
     "batch_size": 512,
