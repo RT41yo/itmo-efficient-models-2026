@@ -1,0 +1,35 @@
+{
+  "name": "baseline_inverse_85_epochs",
+  "seed": 42,
+  "data": {
+    "root": "hw2/data",
+    "batch_size": 512,
+    "test_batch_size": 1000,
+    "num_workers": 4,
+    "pin_memory": true,
+    "download": true,
+    "drop_last": false,
+    "caffe_pixel_scale": true
+  },
+  "optimizer": {
+    "kind": "sgd",
+    "lr": 0.01,
+    "momentum": 0.9,
+    "weight_decay": 0.0005,
+    "caffe_bias_lr_multiplier": 2.0
+  },
+  "scheduler": {
+    "kind": "inverse",
+    "gamma": 0.0001,
+    "power": 0.75
+  },
+  "training": {
+    "epochs": 85,
+    "max_steps": 10000,
+    "device": "auto",
+    "deterministic": false,
+    "amp": false,
+    "log_every_steps": 25,
+    "output_dir": "hw2/results/baseline"
+  }
+}

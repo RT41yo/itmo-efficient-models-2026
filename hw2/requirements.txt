@@ -1,0 +1,7 @@
+# PyTorch уже установлен в общем окружении репозитория.
+# torchvision для torch 2.13.0+cu129 ставится отдельной командой из README,
+# чтобы pip не заменил существующую CUDA-сборку PyTorch.
+matplotlib>=3.7
+numpy>=1.26
+Pillow>=10
+pytest>=8
